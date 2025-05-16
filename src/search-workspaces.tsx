@@ -54,6 +54,25 @@ export default function Command() {
           }}
           title={workspace.name}
           subtitle={`${workspace.count} tabs`}
+          accessories={[
+            ...(workspace.accent
+              ? [
+                  {
+                    text: "Opening",
+                    icon: Icon.ArrowNe,
+                  },
+                ]
+              : []),
+
+            ...(workspace.shared
+              ? [
+                  {
+                    text: "Shared",
+                    icon: Icon.TwoPeople,
+                  },
+                ]
+              : []),
+          ]}
           actions={
             <ActionPanel>
               <Action icon={Icon.Compass} title="Open" onAction={() => onSelectWorkspace(workspace)}></Action>

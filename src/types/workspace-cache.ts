@@ -6,7 +6,13 @@ export interface WorkspaceCache {
 }
 
 export interface Workspace {
+  /**
+   * the workspace window is opened
+   */
   accent: boolean;
+  /**
+   * the opened workspace window is in visible space
+   */
   active: boolean;
   collaboratorsCount: number;
   color: WorkspaceColor;
