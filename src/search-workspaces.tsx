@@ -58,16 +58,21 @@ export default function Command() {
             ...(workspace.accent
               ? [
                   {
-                    text: "Opening",
+                    tag: {
+                      value: "Opening",
+                      color: "#10b981",
+                    },
                     icon: Icon.ArrowNe,
                   },
                 ]
               : []),
-
             ...(workspace.shared
               ? [
                   {
-                    text: "Shared",
+                    tag: {
+                      value: "Shared",
+                      color: "#818cf8",
+                    },
                     icon: Icon.TwoPeople,
                   },
                 ]
