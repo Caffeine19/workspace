@@ -10,12 +10,12 @@ import { alphabetical } from "radash";
 const promisifyExec = promisify(exec);
 
 const readWorkspaceCacheFile = () => {
-  const res = readFileSync(
-    "/Users/caffeinecat/Library/Application Support/Microsoft Edge/Default/Workspaces/WorkspacesCache",
-    "utf-8",
-  ).toString();
+  const workspaceCacheFilePath = `${process.env.HOME}/Library/Application Support/Microsoft Edge/Default/Workspaces/WorkspacesCache`;
+  const res = readFileSync(workspaceCacheFilePath, "utf-8").toString();
+
   // The content of the file is in JSON format, so we can parse it directly
   const json = JSON.parse(res) as WorkspaceCache;
+
   return alphabetical(json.workspaces, (w) => w.name);
 };
 
@@ -28,7 +28,9 @@ export default function Command() {
   }, []);
 
   const onSelectWorkspace = async (workspace: Workspace) => {
-    const command = `/Applications/Microsoft\\ Edge.app/Contents/MacOS/Microsoft\\ Edge --launch-workspace="${workspace.id}"`;
+    const edgePath = "/Applications/Microsoft\\ Edge.app/Contents/MacOS/Microsoft\\ Edge";
+
+    const command = `${edgePath} --launch-workspace="${workspace.id}"`;
     const { stdout, stderr } = await promisifyExec(command);
     if (stderr) {
       console.error("Error launching workspace:", stderr);
