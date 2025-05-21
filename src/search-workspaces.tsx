@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, popToRoot } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, popToRoot, closeMainWindow } from "@raycast/api";
 import { readFileSync } from "fs";
 import { Workspace, WorkspaceCache } from "./types/workspace-cache";
 import { useEffect, useState } from "react";
@@ -38,7 +38,7 @@ export default function Command() {
     if (stdout) {
       console.log("Workspace launched successfully:", stdout);
     }
-    popToRoot();
+    closeMainWindow();
   };
 
   const getIconColor = (workspaceColor: WorkspaceColor) => {
