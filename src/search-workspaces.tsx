@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, popToRoot, closeMainWindow } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, closeMainWindow } from "@raycast/api";
 import { readFileSync } from "fs";
 import { Workspace, WorkspaceCache } from "./types/workspace-cache";
 import { useEffect, useState } from "react";
