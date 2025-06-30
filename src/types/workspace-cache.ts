@@ -29,4 +29,9 @@ export interface Workspace {
   workspaceFluidStatus: number;
   last_active_time?: number;
   sharingUrl?: string;
+  /**
+   * The profile this workspace belongs to
+   */
+  profilePath?: string;
+  profileName?: string;
 }

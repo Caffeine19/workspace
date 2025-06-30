@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "workspace",
   "title": "Workspace",
-  "description": "Intergerate with Microsoft Edge Workspaces.",
+  "description": "Integrate with Microsoft Edge Workspaces.",
   "icon": "edge-stable.png",
   "author": "CaffeineCat",
   "categories": [
@@ -16,6 +16,13 @@
       "title": "Search Workspaces",
       "subtitle": "Microsoft Edge",
       "description": "Search Workspaces from Microsoft Edge.",
+      "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "subtitle": "Microsoft Edge",
+      "description": "Open a new Edge Window with profile selection",
       "mode": "view"
     }
   ],

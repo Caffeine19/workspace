@@ -1,3 +1,3 @@
 # Workspace
 
-Intergerate with Microsoft Edge Workspaces.
+Integrate with Microsoft Edge Workspaces.
