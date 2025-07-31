@@ -1,7 +1,8 @@
 import { ActionPanel, Action, Icon, List, closeMainWindow } from "@raycast/api";
 import { readFileSync, existsSync } from "fs";
 import { Workspace, WorkspaceCache } from "./types/workspace-cache";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { promisifyExec } from "./utils/promisifyExec";
 import { getWorkspaceCacheFilePath, getEdgePath, discoverEdgeProfiles } from "./utils/edgePaths";
 import { hexMap, WorkspaceColor } from "./types/workspace-color";
@@ -46,19 +47,35 @@ const readAllWorkspaceCacheFiles = (): Workspace[] => {
 };
 
 export default function Command() {
-  const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
-  const [profiles, setProfiles] = useState<EdgeProfile[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>("all");
+  const [launchingWorkspace, setLaunchingWorkspace] = useState<string | null>(null);
 
-  useEffect(() => {
-    const discoveredProfiles = discoverEdgeProfiles();
-    setProfiles(discoveredProfiles);
+  // Cache the expensive file system operations
+  const { data: profiles = [], isLoading: profilesLoading } = useCachedPromise(
+    async (): Promise<EdgeProfile[]> => {
+      return discoverEdgeProfiles();
+    },
+    [],
+    {
+      keepPreviousData: true,
+    },
+  );
 
-    const workspaces = readAllWorkspaceCacheFiles();
-    setWorkspaceList(workspaces);
-  }, []);
+  const { data: workspaceList = [], isLoading: workspacesLoading } = useCachedPromise(
+    async (): Promise<Workspace[]> => {
+      return readAllWorkspaceCacheFiles();
+    },
+    [],
+    {
+      keepPreviousData: true,
+    },
+  );
+
+  const isLoading = profilesLoading || workspacesLoading;
 
   const onSelectWorkspace = async (workspace: Workspace) => {
+    setLaunchingWorkspace(workspace.id);
+
     const edgePath = getEdgePath();
     const profileArg =
       workspace.profilePath && workspace.profilePath !== "Default"
@@ -78,6 +95,8 @@ export default function Command() {
       closeMainWindow();
     } catch (error) {
       console.error("Failed to launch workspace:", error);
+    } finally {
+      setLaunchingWorkspace(null);
     }
   };
 
@@ -90,8 +109,9 @@ export default function Command() {
 
   return (
     <List
+      isLoading={isLoading}
       searchBarAccessory={
-        <List.Dropdown tooltip="Select Profile" value={selectedProfile} onChange={setSelectedProfile}>
+        <List.Dropdown tooltip="Select Profile" storeValue={true} defaultValue="all" onChange={setSelectedProfile}>
           <List.Dropdown.Item key="all" title="All Profiles" value="all" />
           {profiles.map((profile) => (
             <List.Dropdown.Item
@@ -107,12 +127,23 @@ export default function Command() {
         <List.Item
           key={`${workspace.profilePath}-${workspace.id}`}
           icon={{
-            source: Icon.Map,
+            source: launchingWorkspace === workspace.id ? Icon.ArrowClockwise : Icon.Map,
             tintColor: getIconColor(workspace.color),
           }}
           title={workspace.name}
           subtitle={`${workspace.count} tabs${workspace.profileName ? ` • ${workspace.profileName}` : ""}`}
           accessories={[
+            ...(launchingWorkspace === workspace.id
+              ? [
+                  {
+                    tag: {
+                      value: "Launching...",
+                      color: "#f59e0b",
+                    },
+                    icon: Icon.ArrowClockwise,
+                  },
+                ]
+              : []),
             ...(workspace.accent
               ? [
                   {
@@ -138,7 +169,7 @@ export default function Command() {
           ]}
           actions={
             <ActionPanel>
-              <Action icon={Icon.Compass} title="Open" onAction={() => onSelectWorkspace(workspace)}></Action>
+              <Action icon={Icon.Compass} title="Open" onAction={() => onSelectWorkspace(workspace)} />
               <Action.CopyToClipboard content={workspace.connectionUrl} title="Share Link" />
             </ActionPanel>
           }
