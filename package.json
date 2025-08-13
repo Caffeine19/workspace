@@ -25,7 +25,15 @@
       "description": "Open a new Edge Window with profile selection",
       "mode": "view"
     }
-  ],
+  ,
+    {
+      "name": "toggle-tabs-pane",
+      "title": "Toggle Tabs Pane",
+      "subtitle": "Microsoft Edge",
+      "description": "Collapse or Pin Edge Tabs Pane",
+      "mode": "no-view"
+    }
+      ],
   "dependencies": {
     "@raycast/api": "^1.98.4",
     "@raycast/utils": "^1.17.0",
