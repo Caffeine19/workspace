@@ -1,12 +1,13 @@
-import { ActionPanel, Action, Icon, List, closeMainWindow, showToast, Toast, popToRoot } from "@raycast/api";
-import { Workspace } from "./types/workspace-cache";
-import { useState } from "react";
+import { Action, ActionPanel, closeMainWindow, Icon, List, popToRoot, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { promisifyExec } from "./utils/promisifyExec";
-import { getEdgePath } from "./utils/edgePaths";
-import { hexMap, WorkspaceColor } from "./types/workspace-color";
+import { useState } from "react";
+
 import { EdgeProfile } from "./types/edge-profile";
+import { Workspace } from "./types/workspace-cache";
+import { hexMap, WorkspaceColor } from "./types/workspace-color";
+import { getEdgePath } from "./utils/edgePaths";
 import { discoverEdgeProfiles } from "./utils/profile";
+import { promisifyExec } from "./utils/promisifyExec";
 import { readAllWorkspaceCacheFiles } from "./utils/workspace";
 
 export default function Command() {

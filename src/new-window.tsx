@@ -1,8 +1,9 @@
-import { ActionPanel, Action, Form, showToast, Toast, closeMainWindow, popToRoot } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { Action, ActionPanel, closeMainWindow, Form, popToRoot, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
+
 import { EdgeProfile } from "./types/edge-profile";
-import { discoverEdgeProfiles } from "./utils/profile";
 import { openNewEdgeWindow } from "./utils/newWindow";
+import { discoverEdgeProfiles } from "./utils/profile";
 
 export default function NewWindowCommand() {
   const [profiles, setProfiles] = useState<EdgeProfile[]>([]);

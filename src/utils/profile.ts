@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, statSync } from "fs";
 import { join } from "path";
+
 import { EdgeProfile } from "../types/edge-profile";
 import { getEdgeDataPath, getWorkspaceCacheFilePath } from "./edgePaths";
 

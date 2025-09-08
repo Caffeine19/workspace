@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "fs";
 import { alphabetical } from "radash";
+
 import { Workspace, WorkspaceCache } from "../types/workspace-cache";
 import { getWorkspaceCacheFilePath } from "./edgePaths";
 import { discoverEdgeProfiles } from "./profile";
