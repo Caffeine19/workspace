@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, closeMainWindow, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, closeMainWindow, showToast, Toast, popToRoot } from "@raycast/api";
 import { Workspace } from "./types/workspace-cache";
 import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
@@ -58,9 +58,8 @@ export default function Command() {
         return;
       }
 
-      closeMainWindow({
-        clearRootSearch: true,
-      });
+      closeMainWindow();
+      popToRoot();
     } catch (error) {
       console.error("Failed to launch workspace:", error);
 
