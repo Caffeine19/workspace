@@ -1,56 +1,17 @@
-import { ActionPanel, Action, Icon, List, closeMainWindow } from "@raycast/api";
-import { readFileSync, existsSync } from "fs";
-import { Workspace, WorkspaceCache } from "./types/workspace-cache";
+import { ActionPanel, Action, Icon, List, closeMainWindow, showToast, Toast } from "@raycast/api";
+import { Workspace } from "./types/workspace-cache";
 import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { promisifyExec } from "./utils/promisifyExec";
-import { getWorkspaceCacheFilePath, getEdgePath, discoverEdgeProfiles } from "./utils/edgePaths";
+import { getEdgePath } from "./utils/edgePaths";
 import { hexMap, WorkspaceColor } from "./types/workspace-color";
-import { alphabetical } from "radash";
 import { EdgeProfile } from "./types/edge-profile";
-
-const readWorkspaceCacheFile = (profilePath: string): Workspace[] => {
-  const workspaceCacheFilePath = getWorkspaceCacheFilePath(profilePath);
-
-  if (!existsSync(workspaceCacheFilePath)) {
-    return [];
-  }
-
-  try {
-    const res = readFileSync(workspaceCacheFilePath, "utf-8").toString();
-    const json = JSON.parse(res) as WorkspaceCache;
-
-    // Add profile information to each workspace
-    return json.workspaces.map((workspace) => ({
-      ...workspace,
-      profilePath,
-      profileName: profilePath === "Default" ? "Default" : profilePath,
-    }));
-  } catch (error) {
-    console.error(`Error reading workspace cache for profile ${profilePath}:`, error);
-    return [];
-  }
-};
-
-const readAllWorkspaceCacheFiles = (): Workspace[] => {
-  const profiles = discoverEdgeProfiles();
-  const allWorkspaces: Workspace[] = [];
-
-  for (const profile of profiles) {
-    if (profile.hasWorkspaces) {
-      const workspaces = readWorkspaceCacheFile(profile.path);
-      allWorkspaces.push(...workspaces);
-    }
-  }
-
-  return alphabetical(allWorkspaces, (w) => w.name);
-};
+import { discoverEdgeProfiles } from "./utils/profile";
+import { readAllWorkspaceCacheFiles } from "./utils/workspace";
 
 export default function Command() {
   const [selectedProfile, setSelectedProfile] = useState<string>("all");
-  const [launchingWorkspace, setLaunchingWorkspace] = useState<string | null>(null);
 
-  // Cache the expensive file system operations
   const { data: profiles = [], isLoading: profilesLoading } = useCachedPromise(
     async (): Promise<EdgeProfile[]> => {
       return discoverEdgeProfiles();
@@ -71,11 +32,11 @@ export default function Command() {
     },
   );
 
-  const isLoading = profilesLoading || workspacesLoading;
+  const [isOpenWorkspaceLoading, setIsOpenWorkspaceLoading] = useState(false);
+
+  const isLoading = profilesLoading || workspacesLoading || isOpenWorkspaceLoading;
 
   const onSelectWorkspace = async (workspace: Workspace) => {
-    setLaunchingWorkspace(workspace.id);
-
     const edgePath = getEdgePath();
     const profileArg =
       workspace.profilePath && workspace.profilePath !== "Default"
@@ -84,19 +45,32 @@ export default function Command() {
 
     const command = `${edgePath} ${profileArg} --launch-workspace="${workspace.id}"`.trim();
 
+    setIsOpenWorkspaceLoading(true);
     try {
-      const { stdout, stderr } = await promisifyExec(command);
+      const { stderr } = await promisifyExec(command);
       if (stderr) {
         console.error("Error launching workspace:", stderr);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to launch workspace",
+          message: stderr,
+        });
+        return;
       }
-      if (stdout) {
-        console.log("Workspace launched successfully:", stdout);
-      }
-      closeMainWindow();
+
+      closeMainWindow({
+        clearRootSearch: true,
+      });
     } catch (error) {
       console.error("Failed to launch workspace:", error);
+
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to launch workspace",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
+      });
     } finally {
-      setLaunchingWorkspace(null);
+      setIsOpenWorkspaceLoading(false);
     }
   };
 
@@ -127,23 +101,12 @@ export default function Command() {
         <List.Item
           key={`${workspace.profilePath}-${workspace.id}`}
           icon={{
-            source: launchingWorkspace === workspace.id ? Icon.ArrowClockwise : Icon.Map,
+            source: Icon.Map,
             tintColor: getIconColor(workspace.color),
           }}
           title={workspace.name}
           subtitle={`${workspace.count} tabs${workspace.profileName ? ` • ${workspace.profileName}` : ""}`}
           accessories={[
-            ...(launchingWorkspace === workspace.id
-              ? [
-                  {
-                    tag: {
-                      value: "Launching...",
-                      color: "#f59e0b",
-                    },
-                    icon: Icon.ArrowClockwise,
-                  },
-                ]
-              : []),
             ...(workspace.accent
               ? [
                   {
